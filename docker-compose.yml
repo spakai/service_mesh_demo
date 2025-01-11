@@ -1,0 +1,16 @@
+services:
+  service_a:
+    build:
+      context: .
+      dockerfile: dockerfile.service_a
+    ports:
+      - "5000:5000"
+
+  service_b:
+    build:
+      context: .
+      dockerfile: dockerfile.service_b
+    ports:
+      - "5001:5001"
+
+ 
