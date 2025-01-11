@@ -1,16 +1,51 @@
+version: '3.8'
+
 services:
+  consul:
+    image: hashicorp/consul:1.15
+    container_name: consul-server
+    restart: always
+    volumes:
+     - ./service_a.hcl:/etc/consul.d/service_a.hcl
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    command: "agent -server -bootstrap -ui -client=0.0.0.0 -config-dir=/etc/consul.d"
+    networks:
+      - app-network
+
   service_a:
     build:
       context: .
       dockerfile: dockerfile.service_a
+    container_name: service_a
     ports:
       - "5000:5000"
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+    networks:
+      - app-network
+    depends_on:
+      - consul
+    
 
   service_b:
+  
     build:
       context: .
       dockerfile: dockerfile.service_b
+    container_name: service_b
     ports:
       - "5001:5001"
-
- 
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+    networks:
+      - app-network
+    depends_on:
+      - consul
+      - service_a
+   
+networks:
+  app-network:
+    driver: bridge
