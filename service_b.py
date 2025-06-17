@@ -11,7 +11,10 @@ def fetch_from_service_a():
         # Query Consul for Service A's address
         response = requests.get(CONSUL_URL)
         if response.status_code == 200:
-            service_info = response.json()[0]  # Get the first instance
+            service_instances = response.json()
+            if not service_instances:
+                return jsonify({"error": "No instances of service_a found in Consul"}), 404
+            service_info = service_instances[0]  # Get the first instance
             service_a_address = service_info['ServiceAddress']
             service_a_port = service_info['ServicePort']
 
