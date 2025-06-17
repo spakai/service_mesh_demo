@@ -2,9 +2,9 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY service_a.py /app/
+COPY requirements.txt service_a.py /app/
 
-RUN pip install flask
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
