@@ -11,10 +11,32 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+# Create a new VPC
+resource "aws_vpc" "custom" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags = {
+    Name = "custom-service-mesh-vpc"
+  }
+}
+
+# Create a new subnet in the custom VPC
+resource "aws_subnet" "custom" {
+  vpc_id                  = aws_vpc.custom.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "custom-service-mesh-subnet"
+  }
+}
+
+# Update the security group to use the custom VPC
 resource "aws_security_group" "demo" {
   name        = "service-mesh-demo-sg"
   description = "Allow HTTP and Consul"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.custom.id
 
   ingress {
     from_port   = 22
@@ -45,9 +67,34 @@ resource "aws_security_group" "demo" {
   }
 }
 
-data "aws_vpc" "default" {
-  default = true
+# Create an Internet Gateway
+resource "aws_internet_gateway" "custom" {
+  vpc_id = aws_vpc.custom.id
+  tags = {
+    Name = "custom-igw"
+  }
 }
+
+# Create a route table
+resource "aws_route_table" "custom" {
+  vpc_id = aws_vpc.custom.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.custom.id
+  }
+  tags = {
+    Name = "custom-public-rt"
+  }
+}
+
+# Associate the route table with your subnet
+resource "aws_route_table_association" "custom" {
+  subnet_id      = aws_subnet.custom.id
+  route_table_id = aws_route_table.custom.id
+}
+
+# Fetch availability zones for the region
+data "aws_availability_zones" "available" {}
 
 resource "aws_instance" "demo" {
   ami                    = data.aws_ami.amazon_linux.id
@@ -55,6 +102,7 @@ resource "aws_instance" "demo" {
   vpc_security_group_ids = [aws_security_group.demo.id]
   key_name               = var.key_name
   user_data              = data.template_file.user_data.rendered
+  subnet_id              = aws_subnet.custom.id
   tags = {
     Name = "service-mesh-demo"
   }
@@ -73,3 +121,44 @@ data "template_file" "user_data" {
   }
 }
 
+resource "aws_secretsmanager_secret" "github_pat" {
+  name = "github_pat"
+}
+
+resource "aws_secretsmanager_secret_version" "github_pat_version" {
+  secret_id     = aws_secretsmanager_secret.github_pat.id
+  secret_string = "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"
+}
+
+# IAM policy for EC2 to access the secret
+data "aws_iam_policy_document" "ec2_secrets_access" {
+  statement {
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [aws_secretsmanager_secret.github_pat.arn]
+  }
+}
+
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_secrets_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "ec2_secrets_policy" {
+  name   = "ec2_secrets_policy"
+  role   = aws_iam_role.ec2_role.id
+  policy = data.aws_iam_policy_document.ec2_secrets_access.json
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
+}

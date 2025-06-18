@@ -19,7 +19,7 @@ variable "key_name" {
 variable "public_key_path" {
   description = "Path to public key file to create key pair"
   type        = string
-  default     = ""
+  default     = "/home/spakai/.ssh/id_rsa.pub"
 }
 
 variable "repo_url" {
