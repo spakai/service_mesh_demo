@@ -101,6 +101,7 @@ resource "aws_instance" "demo" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.demo.id]
   key_name               = var.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   user_data              = data.template_file.user_data.rendered
   subnet_id              = aws_subnet.custom.id
   tags = {
@@ -122,7 +123,7 @@ data "template_file" "user_data" {
 }
 
 resource "aws_secretsmanager_secret" "github_pat" {
-  name = "github_pat"
+  name = "github_pat5"
 }
 
 resource "aws_secretsmanager_secret_version" "github_pat_version" {
