@@ -123,12 +123,12 @@ data "template_file" "user_data" {
 }
 
 resource "aws_secretsmanager_secret" "github_pat" {
-  name = "github_pat5"
+  name = "github_pat20"
 }
 
 resource "aws_secretsmanager_secret_version" "github_pat_version" {
   secret_id     = aws_secretsmanager_secret.github_pat.id
-  secret_string = "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"
+  secret_string = var.github_pat
 }
 
 # IAM policy for EC2 to access the secret
@@ -162,4 +162,10 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2_profile"
   role = aws_iam_role.ec2_role.name
+}
+
+variable "github_pat" {
+  description = "GitHub Personal Access Token"
+  type        = string
+  sensitive   = true
 }

@@ -7,10 +7,9 @@ sudo yum install amazon-linux-extras  git jq aws-cli docker -y
 sudo service docker start
 sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/bin/docker-compose && sudo chmod +x /usr/bin/docker-compose && docker-compose --version
 
-export GITHUB_PAT=$(aws secretsmanager get-secret-value --secret-id github_pat5--region "us-east-1" | jq -r .SecretString)
+export GITHUB_PAT=$(aws secretsmanager get-secret-value --secret-id github_pat20 --region "us-east-1" | jq -r .SecretString)
 sudo git clone -b codex/write-terraform-code-for-aws-setup https://spakai:$GITHUB_PAT@github.com/spakai/service_mesh_demo.git app
-
-sudo cd app
+cd app
 sudo docker-compose up -d --build
 
 
