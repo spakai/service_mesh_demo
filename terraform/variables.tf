@@ -27,3 +27,9 @@ variable "repo_url" {
   type        = string
   default     = "https://github.com/example/service_mesh_demo.git"
 }
+
+variable "github_pat" {
+  description = "GitHub Personal Access Token"
+  type        = string
+  sensitive   = true
+}

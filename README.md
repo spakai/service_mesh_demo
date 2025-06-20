@@ -38,13 +38,14 @@ that automatically starts the Docker Compose environment.
 2. Edit the variables in `terraform/variables.tf` if needed. At a minimum set
    `repo_url` to a repository that contains this project and `key_name` to an
    existing EC2 key pair. Optionally provide `public_key_path` to create the key
-   pair automatically.
-3. Initialise and apply the Terraform configuration:
+   pair automatically. The `github_pat` variable does not have a default and must
+   be supplied at apply time.
+3. Initialise and apply the Terraform configuration, passing your GitHub token:
 
    ```bash
    cd terraform
    terraform init
-   terraform apply
+   terraform apply -var="github_pat=your-github-pat"
    ```
 
 After the apply completes, Terraform outputs the public IP address of the EC2
