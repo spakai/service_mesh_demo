@@ -1,6 +1,6 @@
 # Service Mesh Demo
 
-This repository demonstrates a simple service mesh scenario using Consul for service discovery. Two Flask services are provided and orchestrated using Docker Compose.
+This repository demonstrates a simple service mesh scenario using Consul for service discovery. The configuration enables Consul Connect with mutual TLS so service-to-service traffic is encrypted. Two Flask services are provided and orchestrated using Docker Compose.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ This repository demonstrates a simple service mesh scenario using Consul for ser
    ```
 3. Access the Consul UI at [http://localhost:8500](http://localhost:8500).
 4. Test Service A by visiting [http://localhost:5000/data](http://localhost:5000/data).
-5. Test Service B which fetches data from Service A via Consul by visiting [http://localhost:5001/fetch](http://localhost:5001/fetch).
+5. Test Service B which now reaches Service A through the Consul Connect service mesh by visiting [http://localhost:5001/fetch](http://localhost:5001/fetch).
 
 ## Services
 
@@ -26,7 +26,7 @@ A small Flask service that exposes an endpoint `/data` returning a JSON message 
 
 ### service_b
 
-Another Flask service that queries Consul to discover `service_a`. It then requests data from `service_a` and exposes the result on `/fetch` together with its own status. A `/health` endpoint is also provided.
+Another Flask service that communicates with `service_a` through the Consul Connect service mesh. It requests data via its local sidecar proxy and exposes the result on `/fetch` together with its own status. A `/health` endpoint is also provided.
 
 
 ## Deploy on AWS using Terraform

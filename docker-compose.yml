@@ -7,6 +7,8 @@ services:
     restart: always
     volumes:
      - ./service_a.hcl:/etc/consul.d/service_a.hcl
+     - ./service_b.hcl:/etc/consul.d/service_b.hcl
+     - ./consul.hcl:/etc/consul.d/consul.hcl
     ports:
       - "8500:8500"
       - "8600:8600/tcp"
@@ -22,12 +24,18 @@ services:
     container_name: service_a
     ports:
       - "5000:5000"
-    environment:
-      - CONSUL_HTTP_ADDR=http://consul:8500
     networks:
       - app-network
     depends_on:
       - consul
+
+  service_a_proxy:
+    image: hashicorp/consul:1.15
+    command: "connect proxy -sidecar-for service_a"
+    network_mode: "service:service_a"
+    depends_on:
+      - consul
+      - service_a
     
 
   service_b:
@@ -39,12 +47,20 @@ services:
     ports:
       - "5001:5001"
     environment:
-      - CONSUL_HTTP_ADDR=http://consul:8500
+      - SERVICE_A_URL=http://localhost:8080/data
     networks:
       - app-network
     depends_on:
       - consul
       - service_a
+
+  service_b_proxy:
+    image: hashicorp/consul:1.15
+    command: "connect proxy -sidecar-for service_b -upstream service_a:8080"
+    network_mode: "service:service_b"
+    depends_on:
+      - consul
+      - service_b
    
 networks:
   app-network:
