@@ -122,8 +122,21 @@ data "template_file" "user_data" {
   }
 }
 
+# Cleanup any existing PAT secret so a new one can be created
+resource "null_resource" "cleanup_github_pat_secret" {
+  # Always run to ensure no leftover secret blocks creation
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "aws secretsmanager restore-secret --secret-id github_pat20 --region ${var.region} || true && aws secretsmanager delete-secret --secret-id github_pat20 --force-delete-without-recovery --region ${var.region} || true"
+  }
+}
+
 resource "aws_secretsmanager_secret" "github_pat" {
-  name = "github_pat20"
+  name       = "github_pat20"
+  depends_on = [null_resource.cleanup_github_pat_secret]
 }
 
 resource "aws_secretsmanager_secret_version" "github_pat_version" {
