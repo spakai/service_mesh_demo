@@ -123,6 +123,21 @@ When finished, clean up with:
 terraform destroy -var="github_pat=your-github-pat"
 ```
 
+### Regenerating the GitHub PAT secret
+
+If you need to replace the stored PAT, the Terraform configuration will
+automatically run the following AWS CLI commands before creating a new
+secret:
+
+```bash
+aws secretsmanager restore-secret --secret-id github_pat20 --region us-east-1
+aws secretsmanager delete-secret --secret-id github_pat20 \
+  --force-delete-without-recovery --region us-east-1
+```
+
+These commands restore the secret if it was pending deletion and then
+permanently remove it so the new PAT can be created without conflicts.
+
 ---
 
 ## Security Notes
