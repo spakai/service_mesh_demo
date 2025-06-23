@@ -50,7 +50,7 @@ that automatically starts the Docker Compose environment.
 After the apply completes, Terraform outputs the public IP address of the EC2
 instance. The services will be accessible on the following ports:
 
-- Consul UI: `http://34.237.137.146:8500`
+- Consul UI: `http://<public_ip>:8500`
 - Service A: `http://<public_ip>:5000/data`
 - Service B: `http://<public_ip>:5001/fetch`
 
