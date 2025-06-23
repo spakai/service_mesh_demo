@@ -14,9 +14,13 @@ This repository demonstrates a simple service mesh scenario using Consul for ser
    ```bash
    docker-compose up --build
    ```
-3. Access the Consul UI at [http://localhost:8500](http://localhost:8500).
-4. Test Service A by visiting [http://localhost:5000/data](http://localhost:5000/data).
-5. Test Service B which fetches data from Service A via Consul by visiting [http://localhost:5001/fetch](http://localhost:5001/fetch).
+3. Access the Consul UI at [https://localhost:8501](https://localhost:8501). Accept the self-signed certificate warning if prompted.
+4. Test Service A by visiting [https://localhost:5000/data](https://localhost:5000/data). Use the `ca.pem` file in `certs/` to trust the certificate.
+5. Test Service B which fetches data from Service A via Consul by visiting [https://localhost:5001/fetch](https://localhost:5001/fetch). It communicates with Service A and Consul using mTLS.
+
+### TLS certificates
+
+Self-signed certificates used by the demo are stored in the `certs/` directory. The root CA is `ca.pem`. Import this certificate into your browser or use the `--cacert` option with curl when accessing the HTTPS endpoints locally.
 
 ## Services
 
@@ -48,11 +52,11 @@ that automatically starts the Docker Compose environment.
    ```
 
 After the apply completes, Terraform outputs the public IP address of the EC2
-instance. The services will be accessible on the following ports:
+instance. The services will be accessible on the following ports using TLS:
 
-- Consul UI: `http://<public_ip>:8500`
-- Service A: `http://<public_ip>:5000/data`
-- Service B: `http://<public_ip>:5001/fetch`
+- Consul UI: `https://<public_ip>:8501`
+- Service A: `https://<public_ip>:5000/data`
+- Service B: `https://<public_ip>:5001/fetch`
 
 # Service Mesh Demo on AWS with Terraform
 

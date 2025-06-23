@@ -6,12 +6,14 @@ services:
     container_name: consul-server
     restart: always
     volumes:
-     - ./service_a.hcl:/etc/consul.d/service_a.hcl
+      - ./consul.hcl:/consul/config/consul.hcl
+      - ./service_a.hcl:/consul/config/service_a.hcl
+      - ./certs:/consul/certs
     ports:
-      - "8500:8500"
+      - "8501:8501"
       - "8600:8600/tcp"
       - "8600:8600/udp"
-    command: "agent -server -bootstrap -ui -client=0.0.0.0 -config-dir=/etc/consul.d"
+    command: "agent -config-file=/consul/config/consul.hcl"
     networks:
       - app-network
 
@@ -23,7 +25,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - CONSUL_HTTP_ADDR=http://consul:8500
+      - CONSUL_HTTP_ADDR=https://consul:8501
+    volumes:
+      - ./certs:/certs
     networks:
       - app-network
     depends_on:
@@ -31,7 +35,7 @@ services:
     
 
   service_b:
-  
+
     build:
       context: .
       dockerfile: dockerfile.service_b
@@ -39,7 +43,9 @@ services:
     ports:
       - "5001:5001"
     environment:
-      - CONSUL_HTTP_ADDR=http://consul:8500
+      - CONSUL_HTTP_ADDR=https://consul:8501
+    volumes:
+      - ./certs:/certs
     networks:
       - app-network
     depends_on:
