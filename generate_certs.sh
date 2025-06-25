@@ -19,7 +19,7 @@ req_extensions=v3_req
 subjectAltName=@alt_names
 [alt_names]
 DNS.1=localhost
-DNS.2=consul
+DNS.2=server.dc1.consul
 IP.1=127.0.0.1
 EOC
 
