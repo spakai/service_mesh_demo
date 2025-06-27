@@ -22,6 +22,15 @@ This repository demonstrates a simple service mesh scenario using Consul for ser
 
 Self-signed certificates used by the demo are stored in the `certs/` directory. The root CA is `ca.pem`. Import this certificate into your browser or use the `--cacert` option with curl when accessing the HTTPS endpoints locally.
 
+If you encounter browser warnings about missing Subject Alternative Names, regenerate the certificates:
+
+```bash
+./generate_certs.sh
+```
+
+This recreates `ca.pem` and the service certificates with SAN entries for `localhost`. After running the script, import the new `ca.pem` into your browser.
+
+
 ## Services
 
 ### service_a
