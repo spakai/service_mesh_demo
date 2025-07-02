@@ -1,3 +1,4 @@
+
 # Service Mesh Demo
 
 This repository demonstrates a simple service mesh scenario using Consul for service discovery. Two Flask services are provided and orchestrated using Docker Compose.
@@ -27,9 +28,28 @@ If you encounter browser warnings about missing Subject Alternative Names, regen
 ```bash
 ./generate_certs.sh
 ```
+**Create a client key and CSR.**
+> openssl genrsa -out certs/client-key.pem 2048 openssl req -new -key
+> certs/client-key.pem -out certs/client.csr \   -subj
+> "/CN=browser-client"
 
-This recreates `ca.pem` and the service certificates with SAN entries for `localhost`. After running the script, import the new `ca.pem` into your browser.
+**Sign the client CSR with the demo CA.**
 
+> openssl x509 -req -in certs/client.csr -CA certs/ca.pem \   -CAkey
+> certs/ca-key.pem -CAcreateserial \   -out certs/client.pem -days 825
+
+**Convert to PKCS#12 for Chrome/Edge.**
+1.  (You will be prompted to set an export password.)
+> openssl pkcs12 -export -inkey certs/client-key.pem -in
+> certs/client.pem \   -out certs/client.p12 -name consul-client
+
+ **Import certificates in Windows.**
+    
+    -   Import  `certs/ca.pem`  into the Windows “Trusted Root Certification Authorities”.
+        
+    -   Import  `certs/client.p12`  into the “Personal” certificate store of the user account.
+        
+    -   When visiting  `https://localhost:8051`  (or  `https://localhost:8501`  as configured), Chrome/Edge will prompt you to pick the “consul-client” certificate.
 
 ## Services
 
