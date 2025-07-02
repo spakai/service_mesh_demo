@@ -37,4 +37,8 @@ def health_check():
     return jsonify({"status": "Service B is healthy"}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+  # Serve Service B over HTTPS using the generated certificates. Unlike
+    # Service A, we do not require client authentication for browsers to
+    # access the endpoint, so a simple cert/key pair is sufficient.
+    ssl_context = ("/certs/service_b.pem", "/certs/service_b-key.pem")
+    app.run(host='0.0.0.0', port=5001, ssl_context=ssl_context)

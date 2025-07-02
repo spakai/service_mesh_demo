@@ -16,3 +16,4 @@ verify_incoming = true
 verify_outgoing = true
 verify_server_hostname = true
 verify_incoming_https = true
+enable_script_checks = true
